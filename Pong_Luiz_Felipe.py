@@ -4,6 +4,7 @@ import os
 #inicializa o módulo pygame
 pygame.init()
 pygame.mixer.init()
+sons_imagens = "sons_imagens"
 
 #define a largura_tela e altura_tela da tela
 largura_tela, altura_tela = 1000, 600
@@ -15,12 +16,12 @@ largura_raquete, altura_raquete = 30, 120
 pontos_player_esq = 0
 pontos_player_dir = 0
 
-
-som_rebate = pygame.mixer.Sound("som_batida.mp3")  
-som_vitoria = pygame.mixer.Sound("vitoria.mp3")  
-som_rebate_forte = pygame.mixer.Sound("batida_forte.mp3")  
-som_parede = pygame.mixer.Sound("batendo na parede.mp3")  
-som_gol = pygame.mixer.Sound("som_gol1.mp3")  
+#sons
+som_rebate = pygame.mixer.Sound(os.path.join(sons_imagens, "som_batida.mp3"))  
+som_vitoria = pygame.mixer.Sound(os.path.join(sons_imagens, "vitoria.mp3"))  
+som_rebate_forte = pygame.mixer.Sound(os.path.join(sons_imagens, "batida_forte.mp3"))  
+som_parede = pygame.mixer.Sound(os.path.join(sons_imagens, "batendo na parede.mp3"))  
+som_gol = pygame.mixer.Sound(os.path.join(sons_imagens, "som_gol1.mp3"))  
 
 tela = pygame.display.set_mode((largura_tela, altura_tela))
 pygame.display.set_caption("Pong_Luiz_Felipe")
@@ -38,12 +39,12 @@ VERMELHO_CLARO = (255, 102, 102)
 fonte = pygame.font.SysFont("Arial", 50)
 
 #fundo
-fundo = pygame.image.load("ufsc.png")  #substitua pelo caminho correto
+fundo = pygame.image.load(os.path.join(sons_imagens, "ufsc.png"))  #substitua pelo caminho correto
 fundo = pygame.transform.scale(fundo, (largura_tela, altura_tela))  #redimensiona para o tamanho da tela
 
 #imagens setinha
-caminho_imagem_es = os.path.join("minha_setinha_es.png")
-caminho_imagem_dr = os.path.join("minha_setinha_dr.png")
+caminho_imagem_es = os.path.join(os.path.join(sons_imagens, "minha_setinha_es.png"))
+caminho_imagem_dr = os.path.join(os.path.join(sons_imagens, "minha_setinha_dr.png"))
 seta_imagem_es = pygame.image.load(caminho_imagem_es)
 seta_imagem_dr = pygame.image.load(caminho_imagem_dr)
 minha_imagem_es = pygame.transform.scale(seta_imagem_es, (18, 20))  # Ajusta o tamanho da imagem na esquerda

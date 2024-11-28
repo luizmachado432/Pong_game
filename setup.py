@@ -2,7 +2,7 @@ import sys
 from cx_Freeze import setup, Executable
 
 #essa parte do codigo é para criar um .exe dele
-include_files = ['minha_setinha_dr.png', 'minha_setinha_es.png', 'ufsc.png']
+include_files = ['sons_imagens']
 
 
 build_exe_options = {
