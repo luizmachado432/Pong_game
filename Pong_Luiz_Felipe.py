@@ -3,6 +3,7 @@ import os
 
 #inicializa o módulo pygame
 pygame.init()
+pygame.mixer.init()
 
 #define a largura_tela e altura_tela da tela
 largura_tela, altura_tela = 1000, 600
@@ -13,6 +14,13 @@ largura_raquete, altura_raquete = 30, 120
 #contagem de gols
 pontos_player_esq = 0
 pontos_player_dir = 0
+
+
+som_rebate = pygame.mixer.Sound("som_batida.mp3")  
+som_vitoria = pygame.mixer.Sound("vitoria.mp3")  
+som_rebate_forte = pygame.mixer.Sound("batida_forte.mp3")  
+som_parede = pygame.mixer.Sound("batendo na parede.mp3")  
+som_gol = pygame.mixer.Sound("som_gol1.mp3")  
 
 tela = pygame.display.set_mode((largura_tela, altura_tela))
 pygame.display.set_caption("Pong_Luiz_Felipe")
@@ -89,9 +97,12 @@ while rodando:
     if pontos_player_esq + pontos_player_dir == pontos_maximos:
         if pontos_player_esq > pontos_player_dir:
             texto_vencedor = "PLAYER ESQUERDO GANHOU!"
+            som_vitoria.play()
         elif pontos_player_dir > pontos_player_esq:
-            texto_vencedor = "PLAYER DIREITO GANHOU!"
-
+            texto_vencedor = "PLAYER DIREITO GANHOU!"  
+            som_vitoria.play()
+        
+        
         #exibe virou e aguarda o botao
         while True:
             tela.fill(PRETO)
@@ -116,7 +127,7 @@ while rodando:
     #bola teto/chao
     if (bola_y <= 0 + raio) or (bola_y >= altura_tela - raio):
         velocidade_y *= -1  #inverte a direção vertical da bola se é + vai -, - vai pra +
-    
+        som_parede.play()
     #difiniçoes para reset do jogo(gols)
     
     if (bola_x >= largura_tela - raio):
@@ -124,11 +135,13 @@ while rodando:
         bola_x, bola_y = largura_tela / 2 - raio, altura_tela / 2 - raio
         velocidade_x, velocidade_y = 0.5, 0.5
         velocidade_x *= -1 #)
+        som_gol.play()
     
     if (bola_x <= 0 + raio):
         pontos_player_dir += 1
         bola_x, bola_y = largura_tela / 2 - raio, altura_tela / 2 - raio
-        velocidade_x, velocidade_y = 0.5, 0.5 
+        velocidade_x, velocidade_y = 0.5, 0.5
+        som_gol.play()
         
         
 
@@ -147,13 +160,14 @@ while rodando:
         if raquete_y <= bola_y <= raquete_y + altura_raquete:
             bola_x = raquete_X
             velocidade_x *= -1  #inverte a direção horizontal da bola
-    
+            som_rebate.play()  # Toca o som de rebatida
     #detecta colisão com a raquete esquerda
     if raquete_x <= bola_x <= raquete_x + largura_raquete:
         if raquete_y1 <= bola_y <= raquete_y1 + altura_raquete:
             bola_x = raquete_x + largura_raquete
             velocidade_x *= -1  
-
+            som_rebate.play()  # Toca o som de rebatida
+    
     #controle de movimento do gadget da raquete direita
     if gad == 1:
         if raquete_X <= bola_x <= raquete_X + largura_raquete:
@@ -161,14 +175,15 @@ while rodando:
                 bola_x = raquete_X
                 velocidade_x *= -3.5  #aumenta a velocidade da bola ao ativar o gadget
                 gad = 0 
-
+                som_rebate_forte.play()
     #controle de movimento do gadget da raquete esquerda
     if act == 1:
         if raquete_x <= bola_x <= raquete_x + largura_raquete:
             if raquete_y1 <= bola_y <= raquete_y1 + altura_raquete:
                 bola_x = raquete_x + largura_raquete
                 velocidade_x *= -3.5  #aumenta a velocidade da bola ao ativar o gadget
-                act = 0  
+                act = 0
+                som_rebate_forte.play()
     
     #movimentos básicos
     raquete_y += velocidade_raquete
