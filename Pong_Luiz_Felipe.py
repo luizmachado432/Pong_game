@@ -6,6 +6,9 @@ pygame.init()
 pygame.mixer.init()
 sons_imagens = "sons_imagens"
 
+#gadgets
+gad = act = 0 
+
 #define a largura_tela e altura_tela da tela
 largura_tela, altura_tela = 1000, 600
 
@@ -42,6 +45,25 @@ fonte = pygame.font.SysFont("Arial", 50)
 fundo = pygame.image.load(os.path.join(sons_imagens, "ufsc.png"))  #substitua pelo caminho correto
 fundo = pygame.transform.scale(fundo, (largura_tela, altura_tela))  #redimensiona para o tamanho da tela
 
+
+def detecta_colisao(raquete_x, raquete_y, largura_raquete, altura_raquete, bola_x, bola_y, velocidade_x, som_rebate, som_rebate_forte, gad, act):
+    if raquete_x <= bola_x <= raquete_x + largura_raquete and raquete_y <= bola_y <= raquete_y + altura_raquete:
+        if gad == 1:  #radget da raquete direita
+            velocidade_x *= -3.5
+            gad = 0
+            som_rebate_forte.play()
+        elif act == 1:  #gadget da raquete esquerda
+            velocidade_x *= -3.5
+            act = 0
+            som_rebate_forte.play()
+        else:  #colisão normal
+            velocidade_x *= -1
+            som_rebate.play()
+        return velocidade_x, gad, act  #retorna os valores modificados
+    return velocidade_x, gad, act  #retorna os valores originais se não houve colisão
+
+
+
 #imagens setinha
 caminho_imagem_es = os.path.join(os.path.join(sons_imagens, "minha_setinha_es.png"))
 caminho_imagem_dr = os.path.join(os.path.join(sons_imagens, "minha_setinha_dr.png"))
@@ -57,16 +79,13 @@ velocidade_x, velocidade_y = 0.5, 0.5
 
 #parâmetros da spawn da raquete
 raquete_y = raquete_y1 = altura_tela / 2 - altura_raquete / 2
-raquete_x, raquete_X = 100 - largura_raquete / 2, largura_tela - (100 - largura_raquete / 4)
+raquete_x, raquete_X1 = 100 - largura_raquete / 2, largura_tela - (100 - largura_raquete / 4)
 velocidade_raquete = velocidade_raquete1 = 0
 
-#parâmetros dos gadgets
-gad = act = 0 
 
 while rodando:
     #desenha a imagem de fundo
     tela.blit(fundo, (0, 0))
-    
     #captura os eventos de entrada do usuário
     
     for evento in pygame.event.get():
@@ -95,6 +114,7 @@ while rodando:
             velocidade_raquete = 0 
             velocidade_raquete1 = 0 
     
+    #condiçao de vitoria
     if pontos_player_esq + pontos_player_dir == pontos_maximos:
         if pontos_player_esq > pontos_player_dir:
             texto_vencedor = "PLAYER ESQUERDO GANHOU!"
@@ -102,7 +122,6 @@ while rodando:
         elif pontos_player_dir > pontos_player_esq:
             texto_vencedor = "PLAYER DIREITO GANHOU!"  
             som_vitoria.play()
-        
         
         #exibe virou e aguarda o botao
         while True:
@@ -112,7 +131,7 @@ while rodando:
             tela.blit(mensagem, (largura_tela // 2 - mensagem.get_width() // 2, altura_tela // 2 - 50))
             tela.blit(instrucoes, (largura_tela // 2 - instrucoes.get_width() // 2, altura_tela // 2 + 50))
             pygame.display.update()
-
+            #evento enter para sair
             for evento in pygame.event.get():
                 if evento.type == pygame.QUIT:
                     rodando = False
@@ -129,8 +148,8 @@ while rodando:
     if (bola_y <= 0 + raio) or (bola_y >= altura_tela - raio):
         velocidade_y *= -1  #inverte a direção vertical da bola se é + vai -, - vai pra +
         som_parede.play()
-    #difiniçoes para reset do jogo(gols)
     
+    #difiniçoes para reset do jogo(gols)
     if (bola_x >= largura_tela - raio):
         pontos_player_esq += 1
         bola_x, bola_y = largura_tela / 2 - raio, altura_tela / 2 - raio
@@ -144,8 +163,6 @@ while rodando:
         velocidade_x, velocidade_y = 0.5, 0.5
         som_gol.play()
         
-        
-
     #controles do movimento das raquetes
     if raquete_y >= altura_tela - altura_raquete:
         raquete_y = altura_tela - altura_raquete
@@ -157,34 +174,9 @@ while rodando:
         raquete_y1 = 0
 
     #detecta colisão com a raquete direita
-    if raquete_X <= bola_x <= raquete_X + largura_raquete:
-        if raquete_y <= bola_y <= raquete_y + altura_raquete:
-            bola_x = raquete_X
-            velocidade_x *= -1  #inverte a direção horizontal da bola
-            som_rebate.play()  # Toca o som de rebatida
+    velocidade_x, gad, act = detecta_colisao(raquete_X1, raquete_y, largura_raquete, altura_raquete, bola_x, bola_y, velocidade_x, som_rebate, som_rebate_forte, gad, act)
     #detecta colisão com a raquete esquerda
-    if raquete_x <= bola_x <= raquete_x + largura_raquete:
-        if raquete_y1 <= bola_y <= raquete_y1 + altura_raquete:
-            bola_x = raquete_x + largura_raquete
-            velocidade_x *= -1  
-            som_rebate.play()  # Toca o som de rebatida
-    
-    #controle de movimento do gadget da raquete direita
-    if gad == 1:
-        if raquete_X <= bola_x <= raquete_X + largura_raquete:
-            if raquete_y <= bola_y <= raquete_y + altura_raquete:
-                bola_x = raquete_X
-                velocidade_x *= -3.5  #aumenta a velocidade da bola ao ativar o gadget
-                gad = 0 
-                som_rebate_forte.play()
-    #controle de movimento do gadget da raquete esquerda
-    if act == 1:
-        if raquete_x <= bola_x <= raquete_x + largura_raquete:
-            if raquete_y1 <= bola_y <= raquete_y1 + altura_raquete:
-                bola_x = raquete_x + largura_raquete
-                velocidade_x *= -3.5  #aumenta a velocidade da bola ao ativar o gadget
-                act = 0
-                som_rebate_forte.play()
+    velocidade_x, gad, act = detecta_colisao(raquete_x, raquete_y1, largura_raquete, altura_raquete, bola_x, bola_y, velocidade_x, som_rebate, som_rebate_forte, gad, act)
     
     #movimentos básicos
     raquete_y += velocidade_raquete
@@ -199,8 +191,8 @@ while rodando:
     #desenho do contorno e raquetes
     pygame.draw.rect(tela, VERMELHO_CLARO, pygame.Rect(raquete_x - 2, raquete_y1 - 2, largura_raquete + 4, altura_raquete + 4))  #rontorno raquete esquerda
     pygame.draw.rect(tela, VERMELHO, pygame.Rect(raquete_x, raquete_y1, largura_raquete, altura_raquete))  #raquete esquerda
-    pygame.draw.rect(tela, VERMELHO_CLARO, pygame.Rect(raquete_X - 2, raquete_y - 2, largura_raquete + 4, altura_raquete + 4))  #contorno raquete direita
-    pygame.draw.rect(tela, VERMELHO, pygame.Rect(raquete_X, raquete_y, largura_raquete, altura_raquete))  #raquete direita
+    pygame.draw.rect(tela, VERMELHO_CLARO, pygame.Rect(raquete_X1 - 2, raquete_y - 2, largura_raquete + 4, altura_raquete + 4))  #contorno raquete direita
+    pygame.draw.rect(tela, VERMELHO, pygame.Rect(raquete_X1, raquete_y, largura_raquete, altura_raquete))  #raquete direita
 
     #cria a tabela de gols
     texto_pontos_esq = fonte.render(f"{pontos_player_esq}", True, BRANCO)
@@ -211,7 +203,7 @@ while rodando:
     
     #coloca as imagens dos gadgets nas raquetes
     if gad == 1:
-        tela.blit(minha_imagem_dr, (raquete_X+10, raquete_y))  #imagem da raquete direita
+        tela.blit(minha_imagem_dr, (raquete_X1+10, raquete_y))  #imagem da raquete direita
     if act == 1:
         tela.blit(minha_imagem_es, (raquete_x, raquete_y1))  #imagem da raquete esquerda
 
